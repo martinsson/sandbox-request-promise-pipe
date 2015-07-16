@@ -1,6 +1,5 @@
 var Promise = require("bluebird")
 var rp = require('request-promise');
-var request = require('request')
 var fs = require('fs-extra-promise')
 var path = require('path')
 var multer = require('multer')
@@ -26,27 +25,20 @@ app.get("/sendMedia", function (req, res) {
         },
         method: 'POST'
     };
-    var reqTextLayer = request('http://localhost:4000/sendMedia2', options, function() {
-        console.log("request finished");
-    })
+    var reqTextLayer = rp(options)
 
-    pipeResponse(reqTextLayer, function(message) {
-        console.log("after " + message)
-        res.end(message)
-    })
+    reqTextLayer.then(function (data) {
 
-    //pipeResponse(reqTextLayer, function(message) {
-    //    res.send(message)
-    //});
-    //reqTextLayer.then(function (data) {
-    //    //  console.log(data)
-    //    //lastSend(reqStudio)
-    //
-    //})
-    //    .catch(function (err) {
-    //        console.log(err)
-    //    })
-    //
+            //  console.log(data)
+            //lastSend(reqStudio)
+        pipeResponse(reqTextLayer, function(message) {
+            res.send(200, message)
+        });
+    })
+        .catch(function (err) {
+            console.log(err)
+        })
+
 
 })
 
