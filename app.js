@@ -16,7 +16,7 @@ var self = this
 app.get("/sendMedia", function (req, res) {
 
     console.log("studioAPI", req.headers)
-    var options = {
+    var textLayerOptions = {
         uri: 'http://localhost:4000/sendMedia2',
         formData: {
             attachments: [
@@ -26,21 +26,21 @@ app.get("/sendMedia", function (req, res) {
         method: 'POST'
     };
 
-
-    var reqTextLayer = rp(options)
     var textLayerPath = "./tmp/testStream"
     var textLayerOutputStream = fs.createWriteStream(textLayerPath);
-    reqTextLayer.pipe(textLayerOutputStream)
     textLayerOutputStream.on('finish', function() {
         console.log("finished writing outputStream")
     })
+
+    var reqTextLayer = rp(textLayerOptions)
+    reqTextLayer.pipe(textLayerOutputStream)
+
 
     reqTextLayer.on('end', function () {
         var textLayerInputStream = fs.createReadStream(textLayerPath);
 
         var dataStudio = {
             uri: 'http://localhost:4000/writeMediaWithMulter',
-            //uri: 'http://localhost:4000/writeMediaWithoutMulter',
             formData: {
                 myFile: textLayerInputStream,
                 index: 1
@@ -51,7 +51,6 @@ app.get("/sendMedia", function (req, res) {
         var reqStudio = rp(dataStudio).then(function () {
             res.status(200).send("yess")
         })
-        res.status(200).send("mouai")
     })
 
     reqTextLayer.catch(function (err) {
@@ -62,21 +61,6 @@ app.get("/sendMedia", function (req, res) {
 
 })
 
-function lastSend(bufferdata) {
-
-    var options = {
-        uri: 'http://localhost:4000/writeMediaWithMulter',
-        //uri: 'http://localhost:4000/writeMediaWithoutMulter',
-        formData: {
-            myFile: [bufferdata],
-            index:1
-
-        },
-        method: 'POST'
-    };
-    rp(options)
-
-}
 
 /*
  Text Layer
@@ -118,6 +102,7 @@ app.post("/writeMediaWithMulter",
         dest: "./tmpWrite"
     }), function (req, res) {
         console.log("studioAPI", req.headers)
+        res.status(200).send("wrote media")
 
     })
 
