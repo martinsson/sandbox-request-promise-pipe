@@ -33,8 +33,6 @@ app.get("/sendMedia", function (req, res) {
     })
 
     var reqTextLayer = rp(textLayerOptions)
-    reqTextLayer.pipe(textLayerOutputStream)
-
 
     reqTextLayer.on('end', function () {
         var textLayerInputStream = fs.createReadStream(textLayerPath);
@@ -52,6 +50,11 @@ app.get("/sendMedia", function (req, res) {
             res.status(200).send("yess")
         })
     })
+
+    reqTextLayer.then(function() {
+        reqTextLayer.pipe(textLayerOutputStream)
+    })
+
 
     reqTextLayer.catch(function (err) {
             console.log("Caught error")
