@@ -25,17 +25,37 @@ app.get("/sendMedia", function (req, res) {
         },
         method: 'POST'
     };
+
+
     var reqTextLayer = rp(options)
-
-    reqTextLayer.then(function (data) {
-
-            //  console.log(data)
-            //lastSend(reqStudio)
-        pipeResponse(reqTextLayer, function(message) {
-            res.send(200, message)
-        });
+    var textLayerPath = "./tmp/testStream"
+    var textLayerOutputStream = fs.createWriteStream(textLayerPath);
+    reqTextLayer.pipe(textLayerOutputStream)
+    textLayerOutputStream.on('finish', function() {
+        console.log("finished writing outputStream")
     })
-        .catch(function (err) {
+
+    reqTextLayer.on('end', function () {
+        var textLayerInputStream = fs.createReadStream(textLayerPath);
+
+        var dataStudio = {
+            uri: 'http://localhost:4000/writeMediaWithMulter',
+            //uri: 'http://localhost:4000/writeMediaWithoutMulter',
+            formData: {
+                myFile: textLayerInputStream,
+                index: 1
+
+            },
+            method: 'POST'
+        };
+        var reqStudio = rp(dataStudio).then(function () {
+            res.status(200).send("yess")
+        })
+        res.status(200).send("mouai")
+    })
+
+    reqTextLayer.catch(function (err) {
+            console.log("Caught error")
             console.log(err)
         })
 
